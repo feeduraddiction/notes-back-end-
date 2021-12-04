@@ -6,8 +6,6 @@
 const userRoutes = (app, fs) => {
   const dataPath = './data/users.json';
 
-  // variables
-  // refactored helper methods
   const readFile = (
     callback,
     returnJson = false,
@@ -39,44 +37,37 @@ const userRoutes = (app, fs) => {
   };
 
   // READ
-  // Notice how we can make this 'read' operation much more simple now.
   app.get('/users', (req, res) => {
     readFile((data) => {
       res.send(JSON.stringify(data));
     }, true);
   });
+  // ADD
   app.post('/users', (req, res) => {
     readFile((data) => {
-      // Note: this needs to be more robust for production use.
-      // e.g. use a UUID or some kind of GUID for a unique ID value.
-      const newUserId = Date.now().toString();
-      // add the new user
-      data[newUserId] = req.body;
+      data[req.body.id] = req.body;
       writeFile(JSON.stringify(data, null, 2), () => {
-        res.status(200).send('new user added');
+        res.status(200).send(JSON.stringify(data));
       });
     }, true);
   });
+
   // UPDATE
   app.put('/users/:id', (req, res) => {
     readFile((data) => {
-      // add the new user
-      const userId = req.params.id;
-      data[userId] = req.body;
-
+      data[req.params.id].note = req.body.note;
+      data[req.params.id].hashtag = req.body.hashtag;
       writeFile(JSON.stringify(data, null, 2), () => {
-        res.status(200).send(`users id:${userId} updated`);
+        res.status(200).send(JSON.stringify(data));
       });
     }, true);
   });
   // DELETE
   app.delete('/users/:id', (req, res) => {
     readFile(data => {
-      // add the new user
-      const userId = req.params.id;
-      delete data[userId];
+      delete data[req.params.id];
       writeFile(JSON.stringify(data, null, 2), () => {
-        res.status(200).send(`users id:${userId} removed`);
+        res.status(200).send(JSON.stringify(data));
       });
     }, true);
   });
